@@ -4,9 +4,9 @@
 '''
 standard_board = [
     {'NAME':'START', 'TYPE':'START', 'SUIT':None, 'PRICE':0},
-    {'NAME':'Mediterranean Avenue', 'TYPE':'PROPERTY', 'SUIT':'BROWN'}
-    {'NAME':'Baltic Avenue00', 'TYPE':'PROPERTY', 'SUIT':'BROWN'}
-
+    {'NAME':'Mediterranean Avenue', 'TYPE':'PROPERTY', 'SUIT':'BROWN'},
+    {'NAME':'Baltic Avenue00', 'TYPE':'PROPERTY', 'SUIT':'BROWN'},
+    {'NAME':'Income Tax', 'TYPE':'INCOME_TAX', 'SUIT':None, 'PRICE':None},
     {'NAME':'Oriental Avenue', 'TYPE':'PROPERTY', 'SUIT':'LIGHT_BLUE'}
     {'NAME':'Vermont Avenue', 'TYPE':'PROPERTY', 'SUIT':'LIGHT_BLUE'}
     {'NAME':'Connecticut Avenue', 'TYPE':'PROPERTY', 'SUIT':'LIGHT_BLUE'}
