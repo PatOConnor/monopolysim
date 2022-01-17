@@ -75,7 +75,7 @@ class Monopoly:
         if not investor.in_jail:
             newposition = (investor.position + die1 + die2) % 40
             self.move(investor, newposition)
-            liquidity = self.board_effect(investor)
+            liquidity = self.board_effect(investor, die1+die2)
             if not liquidity:
                 return False #bankrupt
         if investor.doubles_counter > 0:
@@ -91,7 +91,7 @@ class Monopoly:
         investor.position = target_location
 
 
-    def board_effect(self, investor):
+    def board_effect(self, investor, diceroll=None, double_rent=False):
         land = self.board[investor.position]
         if land.type in ['GO', 'JAIL', 'FREE_PARKING']:
             pass#nothing happens when you land on these
@@ -105,15 +105,16 @@ class Monopoly:
             self.move(investor,10,pass_go=False)
             investor.in_jail = True
         elif land.type in ['LAND','RAILROAD','UTILITY']:
-            self.land_actions(investor, land)
+            self.land_actions(investor, land, diceroll, double_rent)
 
 
-    def land_actions(self, investor, land):
+    def land_actions(self, investor, land, diceroll, double_rent=False):
         if not land.owned:
             if investor.money > land.price:
-                self.buy(investor,land)
+                self.buy(investor, land.id)
             else:
-                self.auction(land)
+                self.auction(land.id)
+            return True
         else:
             #calculate value of rent
             if land.type == 'RAILROAD':
@@ -131,11 +132,14 @@ class Monopoly:
                     rent = 100
                 elif matches == 4:
                     rent = 200
+                if double_rent:
+                    rent *= 2
+
             elif land.type == 'UTILITY':
-                if self.board[12].owner == self.board[28].owner:#both utilities
-                    rent = (die1 + die2) * 10
+                if double_rent or self.board[12].owner == self.board[28].owner:#both utilities
+                    rent = diceroll * 10
                 else:
-                    rent = (die1 + die2) * 7
+                    rent = diceroll * 7
             else: #standard property
                 rent = land.rent[land.houses]
 
@@ -152,34 +156,36 @@ class Monopoly:
 
         while(investor.money < debt): #can't pay
             if investor.assets:
-                has_houses = []]
-                for a in investor.assets:
-                    if a['HOUSES'] > 0:
-                        has_houses.append(a)
+                has_houses = [x for x in investor.houses if x['HOUSES'] > 0]
                 if len(has_houses) > 0:
                     land_ID = random.choice(has_houses)
                     self.sell_house(investor,land_ID)
                 else: #time to mortgage property
+                    #collect unmortgaged propertyies in one dict
                     unmortgaged = {}
                     for asset in investor.assets:
                         if asset['MORTGAGED'] == False:
                             unmortgaged[asset] = investor.assets[asset]
+                    #mortgage property if possible
                     if len(unmortgaged) > 0:
                         land_ID = max(unmortgaged, key=unmortgaged.get)
                         self.mortgage(investor, land_ID)
-                    else: #all properties mortgaged, houses sold, and still not enough
+                    else: #losing sequence
                         landlord.money += investor.money
+                        #transfer mortgaged property to bank
                         for a in investor.assets:
-                            #transfer mortgaged property to bank
                             self.bank.assets[a] = investor.assets[a]
                         self.bank_auction()
-                        return False#you lose
-            else:
+                        return False
+            else:#losing sequence
                 landlord.money += investor.money
-                return False#you lose
+                return False
+        #investor can afford it
         investor.money -= debt
         landlord.money += debt
         return True
+
+
 
     def sell_house(self, investor, land_ID):
         investor.assets[land_ID]['HOUSES'] -= 1
@@ -237,4 +243,66 @@ class Monopoly:
         else:
             card = community_chest.pop()
             chest_discard.append(card)
-        if card['EFFECT'] = travel:
+        if card['EFFECT'] == 'TRAVEL':
+            self.move(investor,card['LOCATION'])
+            self.board_effect(investor)
+        elif card['EFFECT'] == 'RAIL':
+            newposition = (investor.position//10 + 1)*10 + 5
+            if newposition == 45: newposition = 5#catch the overflow
+            self.move(investor, newposition)
+            self.board_effect(investor, double_rent=True)
+        elif card['EFFECT'] == 'UTIL':
+            if 12 < investor.position < 28:
+                self.move(investor, 28)#waterworkd
+            else:
+                self.move(investor, 12)#electric Company
+            self.board_effect(investor, double_rent=True)
+        elif card['EFFECT'] == 'PUSH':
+            newposition = investor.position - 3
+            if newposition < 0:
+                newposition += 40
+            self.move(investor, newposition)
+            self.board_effect(investor)
+        elif card['EFFECT'] == 'GET_OUT_OF_JAIL':
+            self.investor.jail_cards += 1
+        elif card['EFFECT'] == 'GO_TO_JAIL':
+            self.move(investor,10,pass_go=False)
+            investor.in_jail = True
+        elif card['EFFECT'] == 'CHAIR':
+            others = self.investors
+            others.remove(investor)
+            for player in others:
+                self.deduct(investor,50,player)
+        elif card['EFFECT'] == 'REPAIR_1':
+            #25, 100
+            has_houses = [x for x in investor.houses if x['HOUSES'] > 0]
+            if len(has_houses) > 0:
+                hotels = 0
+                houses = 0
+                for house_quantity in has_houses:
+                    if house_quantity == 5:
+                        hotels += 1
+                    else:
+                        houses += house_quantity
+                self.deduct(investor, hotels*100 + houses*25)
+        elif card['EFFECT'] == 'REPAIR_2':
+            #40, 115
+            has_houses = [x for x in investor.houses if x['HOUSES'] > 0]
+            if len(has_houses) > 0:
+                hotels = 0
+                houses = 0
+                for house_quantity in has_houses:
+                    if house_quantity == 5:
+                        hotels += 1
+                    else:
+                        houses += house_quantity
+                self.deduct(investor, hotels*115 + houses*40)
+        elif card['EFFECT'] == 'BIRTHDAY':
+            others = self.investors
+            others.remove(investor)
+            for player in others:
+                self.deduct(player,10,investor)
+        elif card['EFFECT'] == 'GIFT':
+            investor.money += card['AMOUNT']
+        elif card['EFFECT'] == 'COST':
+            self.deduct(investor, card['AMOUNT'])
