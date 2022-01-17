@@ -22,7 +22,7 @@ class Monopoly:
         def __init__(self, info):
             self.name = info['NAME']
             self.type = info['TYPE']
-            if self.type == ['PROPERTY']:
+            if self.type == ['LAND']:
                 self.price = info['PRICE']
                 self.house_cost = info['HOUSE_COST']
                 self.suit = info['SUIT']
@@ -39,7 +39,7 @@ class Monopoly:
 
         self.debtors = []#for bankrupt players
 
-        self.bank = [] #for mortgaged properties
+        self.bank = Investor(starting_funds=19080,name='Bank') #for mortgaged properties
 
         self.chance_discard = []
         self.chest_discard = []
@@ -51,65 +51,70 @@ class Monopoly:
         if investor.in_jail:
             pass#
             # #TODO option for buying way out of jail
-            #
 
-        #
-        # option to trade/mortgage
-        #
 
         #roll dice
         die1 = random.randint(1,6)
         die2 = random.randint(1,6)
-        if die1 == die2:
+        if die1 != die2:
+            investor.doubles_counter = 0
+        else:
             investor.doubles_counter += 1
             if investor.in_jail: #doubles gets you out of jail
                 investor.in_jail = False
             if investor.doubles_counter == 3:
-                investor.position = 10 #3x doubles gets you into jail
+                self.move(investor,10) #3x doubles gets you into jail
                 investor.doubles_counter = 0
-        else:
-            investor.doubles_counter = 0
-
-        #
-        #  option to trade/mortgage
-        #
 
         #moving to new space
         if not investor.in_jail:
-            investor.position += die1 + die2
+            newposition = (investor.position + die1 + die2) % 40
+            self.move(investor, newposition)
+            liquidity = self.board_effect(investor)
+            if not liquidity:
+                return False #bankrupt
+        if investor.doubles_counter > 0:
+            self.take_turn(investor)
+        return True #player survives turn
 
-        if investor.position > len(self.board): #passing GO
-            investor.position -= len(self.board)
-        #space takes effect
-        landing = self.board[investor.position]
-        if landing.type == 'GO':
-            pass#
-        elif landing.type in ['COMMUNITY_CHEST', 'CHANCE']:
-            self.draw(investor, landing.type)
-        elif landing.type == 'LUXURY_TAX':
+
+
+    def move(self,investor, target_location, pass_go=True):
+        if investor.position > target_location:
+            if pass_go:
+                investor.money += 200
+        investor.position = target_location
+
+
+    def board_effect(self, investor):
+        land = self.board[investor.position]
+        if land.type in ['GO', 'JAIL', 'FREE_PARKING']:
+            pass#nothing happens when you land on these
+        elif land.type in ['COMMUNITY_CHEST', 'CHANCE']:
+            self.draw(investor, land.type)
+        elif land.type == 'LUXURY_TAX':
             self.luxury_tax(investor)
-        elif landing.type == 'INCOME_TAX':
+        elif land.type == 'INCOME_TAX':
             self.income_tax(investor)
-        elif landing.type == 'GO_TO_JAIL':
-            investor.position = 10 #Jail
+        elif land.type == 'GO_TO_JAIL':
+            self.move(investor,10,pass_go=False)
             investor.in_jail = True
-        elif landing.type == 'JAIL':
-            pass#either walking by or some other effect set .in_jail to True
-        elif landing.type == 'FREE_PARKING':
-            pass
-        elif landing.type in ['PROPERTY','RAILROAD','UTILITY']:
-            if not landing.owned:
-                if investor.money > landing.price:
-                    self.buy(investor,landing)
+        elif land.type in ['LAND','RAILROAD','UTILITY']:
+
+
+    def commerce(self, investor, land):
+            if not land.owned:
+                if investor.money > land.price:
+                    self.buy(investor,land)
                 else:
-                    self.auction(landing)
+                    self.auction(land)
             else:
-                if landing.type == 'RAILROAD':
+                if land.type == 'RAILROAD':
                     railroad_owners = [self.board[5].owner, self.board[15].owner,
                                       self.board[25].owner, self.board[35].owner]
                     matches = 0
                     for r in railroad_owners:
-                        if r == landing.owner:
+                        if r == land.owner:
                             matches += 1
                     if matches == 1:
                         rent = 25
@@ -119,30 +124,73 @@ class Monopoly:
                         rent = 100
                     elif matches == 4:
                         rent = 200
-                elif landing.type == 'UTILITY':
+                elif land.type == 'UTILITY':
                     if self.board[12].owner == self.board[28].owner:#both utilities
                         rent = (die1 + die2) * 10
                     else:
                         rent = (die1 + die2) * 7
-                else:
-                    rent = landing.rent[landing.houses]
+                else: #standard property
+                    rent = land.rent[land.houses]
+                landlord = self.investors[self.board[investor.position].owner]
+                status = self.deduct(investor, rent, landlord)
+                if not status:
+                    return False #investor got broke paying rent
+
+    def deduct(self, investor, debt, landlord=None):
+        if landlord==None:
+            landlord=self.bank
+
+        while(investor.money < debt): #can't pay
+            if investor.assets:
+                #investor mortgages assets
+            else:
+                landlord.money += investor.money
+                return False#you lose
+        landlord.money += investor.money
+
+
+
+
+''''
+
+                NEXT STEP: REFORMAT THE FOLLOWING METHOD INTO A MORTGAGING METHOD
+
+
+''''
+    def charge_rent(self, investor, rent):
+        while(investor.money < rent):
+
+            if investor.assets = []:
+                landlord.money += investor.money
+                investor.deduct(investor.money)
+                return False #couldn't pay rent
+
+
+        if investor.money >= rent:
+            investor.deduct(rent)
+            landlord.money += rent
+        else:
+            while(investor.money)
+
+
                 if investor.money >= rent:
                     investor.money -= rent
-                    self.investors[landing.owner].money += rent
+                    self.investors[land.owner].money += rent
                 else: #not enough money to cover rent
                     difference = rent - investor.money
                     investor.money -= rent
                     while(len(investor.assets) > 0):
-                        #mortgage a random property towards the difference
+                        #mortgage a random LAND towards the difference
                         mortgage = self.mortgage(investor)
                         difference -= mortgage
-                        self.investors[landing.owner].money += mortgage
+                        self.investors[land.owner].money += mortgage
                         if difference <= 0:
                             investor.money -= difference#get money back
                             break
                     if not investor.assets and investor.money < 0:
-                        return False #bankrupt
-        return True #player survives turn
+
+
+
 
     def luxury_tax(self, investor):
         investor.money -= 75
@@ -164,7 +212,3 @@ class Monopoly:
             card = community_chest.pop()
             chest_discard.append(card)
         if card['EFFECT'] = travel:
-
-
-
-    def draw_chest(self, investor):
