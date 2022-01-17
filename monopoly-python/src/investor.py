@@ -6,7 +6,8 @@ class Investor:
         self.in_jail = False
 
         self.money = starting_funds
-        self.assets = []
+        #format: key is LAND_ID, value is mortgage status
+        self.assets = {2:{'MORTGAGED':False, 'HOUSES':0}}
 
 
 
