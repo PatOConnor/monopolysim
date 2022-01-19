@@ -2,20 +2,21 @@ from common.cards import chance, community_chest
 from common.boards import standard_board
 from investor import Investor#, Player
 from numpy import random
+from feedback import feedback, user_feedback
 
 
-def run():
-    game = Monopoly(board=standard_board, player_count=4)
+def run(iswatching=True):
+    game = Monopoly(board=standard_board, player_count=4, watching=iswatching)
     running = True
+    if game.watching: feedback('GAME_START')
     while(running):#TODO while at least two players aren't bankrupt
         for investor in game.investors:
-            player_status = game.take_turn(investor)
+            player_status = game.take_turn(investor, watching)
             if not player_status:
+                if game.watching: feedback('PLAYER_BANKRUPT', investor)
                 game.debtors.append(investor)
                 game.investors.remove(investor)
     print(game.investors[0].name+' Wins with an account of $'+game.investors[0].money)
-
-
 
 
 class Monopoly:
@@ -41,50 +42,47 @@ class Monopoly:
         self.board = [Space(space_data) for space_data in board]
         for i in len(self.board):
             self.board.id = i
-
-
         self.debtors = []#for bankrupt players
-
         self.bank = Investor(starting_funds=19080,name='Bank') #for mortgaged properties
-
         self.chance_discard = []
         self.chest_discard = []
 
-
-
     def take_turn(self, investor):
-        #check if in jail
-        if investor.in_jail:
-            pass#
-            # #TODO option for buying way out of jail
+        if game.watching: feedback(investor, 'TURN_START')
+        self.jail_check(investor)
+        diceroll = self.roll_dice(investor)
+        #moving to new space
+        if not investor.in_jail:
+            newposition = (investor.position + dceroll) % 40
+            self.move(investor, newposition)
+            player_survives = self.board_effect(investor, die1+die2)
+            if not player_survives:
+                return False #bankrupt
+        if investor.doubles_counter > 0:
+            self.take_turn(investor)
+        return True #player survives turn
 
-        #roll dice
+    def jail_check(self, investor):
+
+
+
+    def roll_dice(self, investor):
         die1 = random.randint(1,6)
         die2 = random.randint(1,6)
         if die1 != die2:
             investor.doubles_counter = 0
+            feedback('DICE_STD', investor, die1+die2)
         else:
             investor.doubles_counter += 1
+            feedback('DICE_DBL', investor, die1+die2)
             if investor.in_jail: #doubles gets you out of jail
                 investor.in_jail = False
             if investor.doubles_counter == 3:
                 self.move(investor,10) #3x doubles gets you into jail
                 investor.doubles_counter = 0
 
-        #moving to new space
-        if not investor.in_jail:
-            newposition = (investor.position + die1 + die2) % 40
-            self.move(investor, newposition)
-            liquidity = self.board_effect(investor, die1+die2)
-            if not liquidity:
-                return False #bankrupt
-        if investor.doubles_counter > 0:
-            self.take_turn(investor)
-        return True #player survives turn
-
-
-
     def move(self,investor, target_location, pass_go=True):
+        if game.watching: feedback('MOVEMENT', investor, self.board[target_location].name)
         if investor.position > target_location:
             if pass_go:
                 investor.money += 200
@@ -94,7 +92,7 @@ class Monopoly:
     def board_effect(self, investor, diceroll=None, double_rent=False):
         land = self.board[investor.position]
         if land.type in ['GO', 'JAIL', 'FREE_PARKING']:
-            pass#nothing happens when you land on these
+            pass
         elif land.type in ['COMMUNITY_CHEST', 'CHANCE']:
             self.draw(investor, land.type)
         elif land.type == 'LUXURY_TAX':
