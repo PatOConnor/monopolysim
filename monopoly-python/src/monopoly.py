@@ -11,6 +11,7 @@ def run(iswatching=True):
     if game.watching: feedback('GAME_START')
     while(running):#TODO while at least two players aren't bankrupt
         for investor in game.investors:
+            input()
             player_status = game.take_turn(investor, watching)
             if not player_status:
                 if game.watching: feedback('PLAYER_BANKRUPT', investor)
@@ -58,23 +59,38 @@ class Monopoly:
             player_survives = self.board_effect(investor, die1+die2)
             if not player_survives:
                 return False #bankrupt
+
+        self.free_action(investor)
+
         if investor.doubles_counter > 0:
             self.take_turn(investor)
         return True #player survives turn
 
+    def free_action(self, investor):
+        pass
+        #where the player can buy houses, trade properties, unmortgage, etc.
+
     def jail_check(self, investor):
+        if not investor.in_jail: return
 
-
+        if investor.jail_cards > 0:
+            investor.jail_cards -= 1
+            investor.in_jail = False
+        else:
+            coinflip = random.random() > 0.5
+            if coinflip and investor.money > 50:
+                self.deduct(invesor,50)
+                investor.in_jail = False
 
     def roll_dice(self, investor):
         die1 = random.randint(1,6)
         die2 = random.randint(1,6)
         if die1 != die2:
             investor.doubles_counter = 0
-            feedback('DICE_STD', investor, die1+die2)
+            if game.watching: feedback('DICE_STD', investor, str(die1+die2))
         else:
             investor.doubles_counter += 1
-            feedback('DICE_DBL', investor, die1+die2)
+            if game.watching: feedback('DICE_DBL', investor, str(die1+die2))
             if investor.in_jail: #doubles gets you out of jail
                 investor.in_jail = False
             if investor.doubles_counter == 3:
@@ -108,7 +124,9 @@ class Monopoly:
 
     def land_actions(self, investor, land, diceroll, double_rent=False):
         if not land.owned:
-            if investor.money > land.price:
+            if game.watching: feedback('UNOWNED_LAND',message=[land.name, str(land.price)])
+            buy_cond = investor.money > land.price
+            if buy_cond:
                 self.buy(investor, land.id)
             else:
                 self.auction(land.id)
@@ -143,6 +161,7 @@ class Monopoly:
 
             #charge the rent
             landlord = self.investors[self.board[investor.position].owner]
+            if game.watching: feedback('RENT',investor, [landlord.name, str(rent)])
             status = self.deduct(investor, rent, landlord)
             if not status:
                 return False #investor got broke paying rent
@@ -153,6 +172,7 @@ class Monopoly:
             landlord=self.bank
 
         while(investor.money < debt): #can't pay
+            if game.watching: feedback('INSUFFICIENT', investor)
             if investor.assets:
                 has_houses = [x for x in investor.houses if x['HOUSES'] > 0]
                 if len(has_houses) > 0:
@@ -186,21 +206,25 @@ class Monopoly:
 
 
     def sell_house(self, investor, land_ID):
+        if game.watching: feedback('SELL_HOUSE',investor, self.boards[land_ID].name)
         investor.assets[land_ID]['HOUSES'] -= 1
         investor.money += self.board[land_ID]['HOUSE_COST']/2
 
 
     def mortgage(self, investor, land_ID):
+        if game.watching: feedback('MORTGAGE_PROPERTY', investor, self.boards[land_ID].name)
         investor.money += self.board[land_ID].price/2
         investor.asset[land_ID]['MORTGAGED'] = True
 
 
     def bank_auction(self):
+        if game.watching: feedback('BANK_AUCTION')
         for a in self.bank.assets:
             self.auction(a)
 
 
     def buy(self, investor, land_ID):
+        if game.watching: feedback('BUY',investor, land.name)
         investor.money -= self.board[land_ID].price
         newland = {'MORTGAGED':False, 'HOUSES':0}
         investor.assets[land_ID] = newland
@@ -208,14 +232,16 @@ class Monopoly:
     def auction(self, land_ID, is_mortgaged=False):
         bid = 0
         while(True):#until property is sold
+            if game.watching: feedback('AUCTION_ANNOUNCEMENT',str(bid))
             buyers = [x for x in self.investors if x.money > bid]:
             if len(buyers) > 1:
                 bidder = random.choice(buyers)
                 #bid increases by no more than 50
                 bid += random.randint(bid,min(bidder.money, bid+50))
             #1 out of 3 shot for now
-            win_cond = 0.25 < random.random()
-            if win_cond or len(buyers) == 0:
+            win_cond = 0.25 < random.random() or len(buyers) == 0
+            if win_cond:
+                if game.watching: feedback('AUCTION_BUY',investor, [self.boards[land_ID].name, str(bid)])
                 bidder.money -= bid
                 newland = {'MORTGAGED':is_mortgaged, 'HOUSES':0}
                 bidder.assets[land_ID] = newland.id
@@ -223,15 +249,18 @@ class Monopoly:
 
 
     def luxury_tax(self, investor):
+        if game.watching: feedback('TAX','75')
         investor.money -= 75
         if investor.money < 0:
             investor.money += self.mortgage(investor)
 
     def income_tax(self, investor):
         if investor.money > 2000:
-            investor.money -= 200
+            tax = 200
         else:
-            investor.money -= investor.money//10
+            tax = investor.money//10
+        investor.money -= tax
+        feedback('TAX', investor, str(tax))
 
 
     def draw(self, investor, deck):
@@ -241,6 +270,8 @@ class Monopoly:
         else:
             card = community_chest.pop()
             chest_discard.append(card)
+        if game.watching: feedback('DRAW_CARD', investor, card.text)
+
         if card['EFFECT'] == 'TRAVEL':
             self.move(investor,card['LOCATION'])
             self.board_effect(investor)
@@ -262,6 +293,7 @@ class Monopoly:
             self.move(investor, newposition)
             self.board_effect(investor)
         elif card['EFFECT'] == 'GET_OUT_OF_JAIL':
+            if game.watching: feedback('GET_OUT_OF_JAIL')
             self.investor.jail_cards += 1
         elif card['EFFECT'] == 'GO_TO_JAIL':
             self.move(investor,10,pass_go=False)
@@ -271,7 +303,12 @@ class Monopoly:
             others.remove(investor)
             for player in others:
                 self.deduct(investor,50,player)
-        elif card['EFFECT'] == 'REPAIR_1':
+        elif card['EFFECT'] == 'BIRTHDAY':
+            others = self.investors
+            others.remove(investor)
+            for player in others:
+                self.deduct(player,10,investor)
+        elif card['EFFECT'] in ['REPAIR_1', 'REPAIR_2']:
             #25, 100
             has_houses = [x for x in investor.houses if x['HOUSES'] > 0]
             if len(has_houses) > 0:
@@ -282,24 +319,11 @@ class Monopoly:
                         hotels += 1
                     else:
                         houses += house_quantity
-                self.deduct(investor, hotels*100 + houses*25)
-        elif card['EFFECT'] == 'REPAIR_2':
-            #40, 115
-            has_houses = [x for x in investor.houses if x['HOUSES'] > 0]
-            if len(has_houses) > 0:
-                hotels = 0
-                houses = 0
-                for house_quantity in has_houses:
-                    if house_quantity == 5:
-                        hotels += 1
-                    else:
-                        houses += house_quantity
-                self.deduct(investor, hotels*115 + houses*40)
-        elif card['EFFECT'] == 'BIRTHDAY':
-            others = self.investors
-            others.remove(investor)
-            for player in others:
-                self.deduct(player,10,investor)
+                feedback('REPAIRS', investor, [houses,hotels])
+                if card['EFFECT'] == 'REPAIR_1':
+                    self.deduct(investor, hotels*100 + houses*25)
+                else:
+                    self.deduct(investor, hotels*115 + houses*40)
         elif card['EFFECT'] == 'GIFT':
             investor.money += card['AMOUNT']
         elif card['EFFECT'] == 'COST':
