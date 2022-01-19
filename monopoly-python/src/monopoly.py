@@ -5,6 +5,7 @@ from numpy import random
 from feedback import feedback, user_feedback
 
 
+
 def run(iswatching=True):
     game = Monopoly(board=standard_board, player_count=4, watching=iswatching)
     running = True
