@@ -19,12 +19,12 @@ chance = [
         {'TEXT':'Go Back Three Spaces', 'EFFECT':'PUSH', 'DISTANCE':-3},
         {'TEXT':'Get Out Of Jail Free', 'EFFECT':'GET_OUT_OF_JAIL',},
         {'TEXT':'Go Directly To Jail', 'EFFECT':'GO_TO_JAIL',},
-        {'TEXT':'You Have Been Elected Chairman of the Board: Pay $50 Each', 'EFFECT':'CHAIR'},
-        {'TEXT':'Make General Repairs on All Property', 'EFFECT':'REPAIR_1'},
+        #{'TEXT':'You Have Been Elected Chairman of the Board: Pay $50 Each', 'EFFECT':'CHAIR'},
+        #{'TEXT':'Make General Repairs on All Property', 'EFFECT':'REPAIR_1'},
 
         {'TEXT':'Bank Pays You $50 Dividend', 'EFFECT':'GIFT', 'AMOUNT':50},
         {'TEXT':'Building Loan Matures: $150', 'EFFECT':'GIFT', 'AMOUNT':150},
-        {'TEXT':'Speeding Fine: $15', 'EFFECT':'COST', 'AMOUNT':15},
+        {'TEXT':'Speeding Fine: $15', 'EFFECT':'COST', 'AMOUNT':10000},
         ]
 
 community_chest = [
@@ -41,8 +41,8 @@ community_chest = [
         {'TEXT':'You Win Second Prize in a Beauty Contest!', 'EFFECT':'GIFT', 'AMOUNT':10},
         {'TEXT':'Inherit $100', 'EFFECT':'GIFT', 'AMOUNT':100},
 
-        {'TEXT':'Its Your Birthday! Collect $10 from each player', 'EFFECT':'BIRTHDAY'},
-        {'TEXT':'Assessed for Street Repair', 'EFFECT':'REPAIR_2'},
+        #{'TEXT':'Its Your Birthday! Collect $10 from each player', 'EFFECT':'BIRTHDAY'},
+        #{'TEXT':'Assessed for Street Repair', 'EFFECT':'REPAIR_2'},
 
         {'TEXT':'Doctors Fee: $50', 'EFFECT':'COST', 'AMOUNT':50},
         {'TEXT':'Hospital Fee: $100', 'EFFECT':'COST', 'AMOUNT':100},

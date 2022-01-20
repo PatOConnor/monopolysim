@@ -4,6 +4,7 @@ from investor import Investor#, Player
 from numpy import random
 from feedback import feedback#, user_feedback
 
+from os import system
 
 
 
@@ -17,14 +18,20 @@ def run(iswatching=True):
             game.turn_status()
             input()
         for investor in game.investors:
+            if len(game.investors) == 1:
+                running = False
+                break
             #input()
+            if game.watching: feedback('TURN_START', investor)
             player_status = game.take_turn(investor)
             if not player_status:
                 if game.watching: feedback('PLAYER_BANKRUPT', investor)
                 game.debtors.append(investor)
                 game.investors.remove(investor)
         game.turn_count += 1
-    print(game.investors[0].name+' Wins with an account of $'+game.investors[0].money)
+        if game.turn_count % 10 == 1:
+            system("cls")
+    print(game.investors[0].name+' Wins with an account of $'+str(game.investors[0].money))
 
 class Space:
     def __init__(self, info):
@@ -44,7 +51,7 @@ class Monopoly:
 
     def __init__(self, board, player_count, watching):
         #making investors
-        self.investors = [Investor(starting_funds=1500, name='Player_'+str(x)) for x in range(player_count)]
+        self.investors = [Investor(starting_funds=1500, name='Player '+str(x)) for x in range(1,player_count+1)]
         #making monopoly board
         self.board = [Space(space_data) for space_data in board]
         for i in range(len(self.board)):
@@ -59,8 +66,8 @@ class Monopoly:
         self.chest = community_chest
 
     def turn_status(self):
-        print('*'*15)
-        print('Turn '+str(self.turn_count))
+        print('\n'+'*'*15)
+        print('Beginning of Turn '+str(self.turn_count))
         for investor in self.investors:
             print(investor.name + ' has $' + str(investor.money) + '  and  ' + str(len(investor.assets)) + ' properties')
         print('*'*15)
@@ -72,7 +79,7 @@ class Monopoly:
         #print(investor.money)
         self.jail_check(investor)
         diceroll = self.roll_dice(investor)
-        print(diceroll)
+        #print(diceroll)
         #moving to new space
         if not investor.in_jail:
             newposition = (investor.position + diceroll) % 40
@@ -208,8 +215,8 @@ class Monopoly:
                             unmortgaged[asset] = investor.assets[asset]
                     #mortgage property if possible
                     if len(unmortgaged) > 0:
-                        land_ID = random.choice(unmortgaged)
-                        self.mortgage(investor, land_ID)
+                        land_ID = random.choice([x for x in unmortgaged])#grab a key, not the dict entry
+                        self.mortgage(investor, self.board[land_ID])
                     else: #losing sequence
                         landlord.money += investor.money
                         #transfer mortgaged property to bank
@@ -225,15 +232,15 @@ class Monopoly:
         landlord.money += debt
         return True
 
-    def sell_house(self, investor, land_ID):
-        if self.watching: feedback('SELL_HOUSE',investor, self.boards[land_ID].name)
+    def sell_house(self, investor, land):
+        if self.watching: feedback('SELL_HOUSE',investor, self.board[land.id].name)
         investor.assets[land_ID]['HOUSES'] -= 1
         investor.money += self.board[land_ID]['HOUSE_COST']/2
 
-    def mortgage(self, investor, land_ID):
-        if self.watching: feedback('MORTGAGE_PROPERTY', investor, self.boards[land_ID].name)
-        investor.money += self.board[land_ID].price/2
-        investor.asset[land_ID]['MORTGAGED'] = True
+    def mortgage(self, investor, land):
+        if self.watching: feedback('MORTGAGE_PROPERTY', investor, self.board[land.id].name)
+        investor.money += self.board[land.id].price/2
+        investor.assets[land.id]['MORTGAGED'] = True
 
     def bank_auction(self):
         if self.watching: feedback('BANK_AUCTION')
@@ -251,7 +258,7 @@ class Monopoly:
     def auction(self, land, is_mortgaged=False):
         bid = 0
         while(True):#until property is sold
-            print(bid)
+            #print(bid)
             #if self.watching: feedback('AUCTION_ANNOUNCEMENT',str(bid))
             buyers = [x for x in self.investors if x.money > bid]
             if len(buyers) > 1:
@@ -261,10 +268,11 @@ class Monopoly:
             #1 out of 3 shot for now
             win_cond = 0.25 < random.random() or len(buyers) == 0
             if win_cond:
-                if self.watching: feedback('AUCTION_BUY',bidder, [land.name, str(bid)])
+                print(type(land))
+                if self.watching: feedback('AUCTION_BUY', bidder, [self.board[land.id].name, str(bid)])
                 bidder.money -= bid
                 newland = {'MORTGAGED':is_mortgaged, 'HOUSES':0}
-                bidder.assets[land.id] = newland
+                bidder.assets[self.board[land.id]] = newland
                 break
 
     def luxury_tax(self, investor):
@@ -277,7 +285,7 @@ class Monopoly:
         else:
             tax = investor.money//10
         self.deduct(investor,tax)
-        feedback('TAX', investor, str(tax))
+        if self.watching: feedback('TAX', investor, str(tax))
 
 
     def draw(self, investor, deck):

@@ -5,7 +5,7 @@ def feedback(msg_type, investor=None, data=None):
         print('*'*30)
         print('Welcome To Monopoly Simulator!')
     elif msg_type=='TURN_START':
-        print('*'*30)
+        print('\n')
         print(investor.name+' begins their turn!')
     elif msg_type=='PLAYER_BANKRUPT':
         print(investor.name+' has gone bankrupt and has left the game!')
