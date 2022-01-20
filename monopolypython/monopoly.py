@@ -13,7 +13,9 @@ def run(iswatching=True):
     if game.watching: feedback('GAME_START')
     #input()
     while(running):#TODO while at least two players aren't bankrupt
-        if game.watching: game.turn_status()
+        if game.watching:
+            game.turn_status()
+            input()
         for investor in game.investors:
             #input()
             player_status = game.take_turn(investor)
@@ -281,14 +283,14 @@ class Monopoly:
     def draw(self, investor, deck):
         if deck == 'CHANCE':
             if len(self.chance) == 0:
-                self.chance = self.chance_discard, self.chance_discard = self.chance
-                self.chamce = random.shuffle(self.chance)
+                self.chance, self.chance_discard = self.chance_discard, self.chance
+                random.shuffle(self.chance)
             card = self.chance.pop()
             self.chance_discard.append(card)
         else:
             if len(self.chest) == 0:
-                self.chest = self.chest_discard, self.chest_discard = community_chest
-                self.chest = random.shuffle(self.chest)
+                self.chest, self.chest_discard = self.chest_discard, self.chest
+                random.shuffle(self.chest)
             card = self.chest.pop()
             self.chest_discard.append(card)
 
