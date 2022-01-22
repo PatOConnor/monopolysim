@@ -29,7 +29,7 @@ std_board_data = [
     'RENTS':[4,20,60,180,320,450], 'HOUSE_COST':50},
     {'ID':4, 'NAME':'Income Tax', 'TYPE':'INCOME_TAX'},
 
-    {'ID':5, 'NAME':'Reading Railroad', 'TYPE':'RAILROAD', 'SUIT':'RAILROAD' 'PRICE':200},
+    {'ID':5, 'NAME':'Reading Railroad', 'TYPE':'RAILROAD', 'SUIT':'RAILROAD', 'PRICE':200},
     {'ID':6, 'NAME':'Oriental Avenue', 'TYPE':'LAND', 'SUIT':'LIGHT_BLUE', 'PRICE':100,
     'RENTS':[6,30,90,270,400,550], 'HOUSE_COST':50},
     {'ID':7, 'NAME':'Chance', 'TYPE':'CHANCE'},

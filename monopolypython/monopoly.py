@@ -42,6 +42,7 @@ class Monopoly:
         for investor in self.investors:
             print(investor.name + ' has $' + str(investor.money) + '  and  ' + str(len(investor.assets)) + ' properties')
         print('*'*15)
+        input()
 
     '''Primary Methods for Game Processing'''
     def take_turn(self, investor):
@@ -112,18 +113,20 @@ class Monopoly:
                         investor.build_house(land, bank)
 
         #TRADING
-        needed = investor.needed_for_monopoly()
+        needed_for_monopoly = investor.needed_for_monopoly()
         if needed != []: #if the investor is close to a monopoly,
-            for land in needed[::-1]:
+            for land in needed_for_monopoly[::-1]:
                 if not land.is_owned:
                     continue #no one to trade with; check the others
                 else:
                     good_trades = land.owner.needed_for_monopoly() #missing lands for other players
-                    for land_2 in good_trades[::-1]:
+                    for otherland in good_trades[::-1]:
                         if land_2 in investor.assets:
-                            investor.trade(land.owner,land,land_2) #both players achieve monopoly
+                            #both players achieve monopoly
+                            investor.trade(land.owner,land,otherland)
                             break
         elif self.all_land_owned():
+            #'hey, anyone want this?'
             land = random.choice(investor.assets)
             for player in self.investors:
                 if player != investor and land not in player.needed_for_monopoly():
@@ -131,10 +134,10 @@ class Monopoly:
                     if otherland not in investor.needed_for_monopoly():
                         investor.trade(player,land,otherland)
 
-
-
     def all_land_owned(self):
-        return True if sum([len(player.assets) for player in self.investors]) is 28 else False
+        return True if sum([len(player.assets) for player in self.investors]) == 28 else False
+
+
 
 
     '''Property Stuff'''

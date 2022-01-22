@@ -94,6 +94,18 @@ class Investor:
                 result.append(land)
         return result
 
+    def trade(self, opponent, land, otherland):
+        self.assets.append(otherland)
+        otherland.owner = self
+        opponent.assets.remove(otherland)
+
+        opponent.assets.append(land)
+        land.owner = opponent
+        self.assets.remove(land)
+        return
+
+
+
 
     def unmortgaged_land(self):
         result = []
@@ -151,5 +163,28 @@ class Investor:
         if rr==4: return 200
 
 
+    #returns list of the spaces this player needs to get a full suit
+    def needed_for_monopoly(self):
+        result = []
 
-    def near_monopolies(self):
+
+
+        #check the player assets
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#
