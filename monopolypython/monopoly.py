@@ -177,7 +177,7 @@ class Monopoly:
 
     def card_effect(self,investor,card):
         if card.effect == 'TRAVEL':
-            self.move(investor, card.location)
+            self.move(investor, card.amount)
             self.board_effect(investor)
 
         elif card.effect == 'RAIL':

@@ -4,20 +4,38 @@ class Investor:
         self.position = 0 #Start Space
         self.doubles_counter = 0
         self.in_jail = False
+        self.is_bankrupt = False
         self.name = name
         self.money = starting_funds
         #format: {LAND_ID:{'MORTGAGED':True/False, 'HOUSES':N}}
         self.assets = {}
         self.jail_cards = 0
 
-    def pay_to(self, amount, landlord):
+    #bank is always present but it sometimes the landlord
+    def pay_to(self, amount, landlord, bank=None):
+        while investor.cant_pay(amount):
+            if investor.has_houses():
+                location = random.randint(self.assets)
+                investor.sell_house(location, bank)
+            elif investor.has_property():
+                location = random.randint(self.assets)
+                investor.mortgage(location, bank)
+            else:
+                landlord.money += investor.money
+                investor.money = 0
+                investor.is_bankrupt = True
+                investor.repo_assets(bank)
+                return
+        investor.money -= amount
+        landlord.money += amount
+        return
 
 
-
-'''    def deduct(self, investor, debt, landlord=None):
+    '''
+    def deduct(self, investor, debt, landlord=None):
         if landlord==None:
             landlord=self.bank
-        while(investor.money < debt): #can't pay
+here    while(investor.money < debt): #can't pay
             if self.watching: feedback('INSUFFICIENT', investor)
             if investor.assets:
                 has_houses = [x for x in investor.assets if investor.assets[x]['HOUSES'] > 0]

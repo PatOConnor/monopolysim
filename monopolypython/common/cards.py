@@ -7,17 +7,17 @@ keys are integer IDs, and the value is itself a dictionary with string keys
     'text', 'effect'
 '''
 deckdata_chance = [
-        {'text':'Advance to GO', 'effect':'TRAVEL', 'location':0,},
-        {'text':'Advance to Boardwalk', 'effect':'TRAVEL', 'location':39,},
-        {'text':'Advance to Illinois Avenue', 'effect':'TRAVEL', 'location':0,},
-        {'text':'Advance to St Charles Place', 'effect':'TRAVEL', 'location':0,},
-        {'text':'Advance to Reading Railroad', 'effect':'TRAVEL', 'location':0,},
+        {'text':'Advance to GO', 'effect':'TRAVEL', 'amount':0,},
+        {'text':'Advance to Boardwalk', 'effect':'TRAVEL', 'amount':39,},
+        {'text':'Advance to Illinois Avenue', 'effect':'TRAVEL', 'amount':0,},
+        {'text':'Advance to St Charles Place', 'effect':'TRAVEL', 'amount':0,},
+        {'text':'Advance to Reading Railroad', 'effect':'TRAVEL', 'amount':0,},
 
         {'text':'Advance to nearest Railroad', 'effect':'RAIL'},
         {'text':'Advance to nearest Railroad', 'effect':'RAIL'},
         {'text':'Advance to nearest Utility', 'effect':'UTIL'},
 
-        {'text':'Go Back Three Spaces', 'effect':'PUSH', 'distance':-3},
+        {'text':'Go Back Three Spaces', 'effect':'PUSH', 'amount':-3},
         {'text':'Get Out Of Jail Free', 'effect':'GET_OUT_OF_JAIL',},
         {'text':'Go Directly To Jail', 'effect':'GO_TO_JAIL',},
         #{'text':'You Have Been Elected Chairman of the Board: Pay $50 Each', 'effect':'CHAIR'},
@@ -25,11 +25,11 @@ deckdata_chance = [
 
         {'text':'Bank Pays You $50 Dividend', 'effect':'GIFT', 'amount':50},
         {'text':'Building Loan Matures: $150', 'effect':'GIFT', 'amount':150},
-        {'text':'Speeding Fine: $15', 'effect':'COST', 'amount':10000},
+        {'text':'Speeding Fine: $15', 'effect':'COST', 'amount':15},
         ]
 
 deckdata_community_chest = [
-        {'text':'Advance to GO', 'effect':'TRAVEL', 'location':0,},
+        {'text':'Advance to GO', 'effect':'TRAVEL', 'amount':0,},
         {'text':'Get Out Of Jail Free', 'effect':'GET_OUT_OF_JAIL',},
         {'text':'Go Directly To Jail', 'effect':'GO_TO_JAIL',},
 
@@ -51,12 +51,17 @@ deckdata_community_chest = [
 ]
 
 class Card:
-    def __init__(self, data):
+    def __init__(self, cards_dict):
         #convert to a class instead of a dictionary lookup
-        for (key,val) in data:
-            self.key = val
         self.flipped = False
         self.in_inventory = False
+        for pair in cards_dict.items():
+            if pair[0] == 'text':
+                self.text = pair[1]
+            elif pair[0] == 'effect':
+                self.effect = pair[1]      #programming horror?
+            elif pair[0] == 'amount':
+                self.amount = pair[1]
 
 class Deck:
     def __init__(self, cards_list):
@@ -82,5 +87,5 @@ class Deck:
                 return card
 
 
-chance = [Deck(x) for x in deckdata_chance]
-community_chest = [Deck(x) for x in deckdata_community_chest]
+chance = Deck(deckdata_chance)
+community_chest = Deck(deckdata_community_chest)
