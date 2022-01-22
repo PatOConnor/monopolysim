@@ -111,26 +111,30 @@ class Monopoly:
                             feedback('BUILD_HOUSE',investor, land.name)
                         investor.build_house(land, bank)
 
-        #if there is a favorable trade, perform it
-        near_monopolies = investor.near_monopolies()
-        if near_monopolies != []: #if the investor is close to a monopoly,
+        #TRADING
+        needed = investor.needed_for_monopoly()
+        if needed != []: #if the investor is close to a monopoly,
+            for land in needed[::-1]:
+                if not land.is_owned:
+                    continue #no one to trade with; check the others
+                else:
+                    good_trades = land.owner.needed_for_monopoly() #missing lands for other players
+                    for land_2 in good_trades[::-1]:
+                        if land_2 in investor.assets:
+                            investor.trade(land.owner,land,land_2) #both players achieve monopoly
+                            break
+        elif self.all_land_owned():
+            land = random.choice(investor.assets)
+            for player in self.investors:
+                if player != investor and land not in player.needed_for_monopoly():
+                    otherland = random.choice(player.assets)
+                    if otherland not in investor.needed_for_monopoly():
+                        investor.trade(player,land,otherland)
 
-            #itll scan to see if the missing piece is owned by another player
-
-            #if it is:
-                #perform the trade with the corresponding piece if both players get a monopoly
-                #perform the trade with a piece that the other investor has at least one of the suit of
-                #dont perform the trade if theres nothing in it for the other guy
 
 
-        #if all property is owned and no near_monopolies,
-            #make a random trade as long as it does not give the
-            #opponent a monopoly
-
-
-
-
-
+    def all_land_owned(self):
+        return True if sum([len(player.assets) for player in self.investors]) is 28 else False
 
 
     '''Property Stuff'''
