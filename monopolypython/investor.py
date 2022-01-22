@@ -12,7 +12,7 @@ class Investor:
 
     #bank is always present but it sometimes the landlord
     def pay_to(self, amount, landlord, bank=None):
-        while self.cant_pay(amount):
+        while not self.can_pay(amount):
             if self.land_with_houses() != []:
                 house_land = self.land_with_houses()
                 location = random.choice(house_land) #random house
@@ -40,15 +40,26 @@ class Investor:
         land.owner = self
         self.assets.append(land)
 
-    def mortgage(self, land):
+    def mortgage(self, land, bank):
         if self.watching: feedback('MORTGAGE_PROPERTY', self, land.name)
-        self.money += land.price/2
+        bank.pay_to(land.price/2, self)
         land.is_mortgaged = True
+
+    def unmortgage(self, land, bank):
+        if self.watching: feedback('UNMORTGAGE_PROPERTY', self, land.name)
+        self.pay_to(land.price/2 * 1.1, bank)
 
     def land_with_houses(self):
         result = []
         for land in self.assets:
             if land.houses > 0 or land.has_hotel:
+                result.append(land)
+        return result
+
+    def mortgaged_land(self):
+        result = []
+        for land in self.assets:
+            if land.is_mortgaged:
                 result.append(land)
         return result
 
@@ -60,8 +71,8 @@ class Investor:
                 result.append(land)
         return result
 
-    def cant_pay(self, amount):
-        if amount > self.money:
+    def can_pay(self, amount):
+        if amount < self.money:
             return True
         return False
 
@@ -107,3 +118,7 @@ class Investor:
         if rr==2: return 50
         if rr==3: return 100
         if rr==4: return 200
+
+
+
+    def near_monopolies(self):

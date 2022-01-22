@@ -5,12 +5,12 @@ class Space:
         self.type = info['TYPE']
         if self.type in  ['LAND', 'UTILITY', 'RAILROAD']:
             self.price = info['PRICE']
+            self.suit = info['SUIT']
             self.is_owned = False
             self.owner = None
             self.is_mortgaged = False
         if self.type == 'LAND':
             self.house_cost = info['HOUSE_COST']
-            self.suit = info['SUIT']
             self.rents = info['RENTS']
             self.houses = 0
             self.has_hotel = False
@@ -29,7 +29,7 @@ std_board_data = [
     'RENTS':[4,20,60,180,320,450], 'HOUSE_COST':50},
     {'ID':4, 'NAME':'Income Tax', 'TYPE':'INCOME_TAX'},
 
-    {'ID':5, 'NAME':'Reading Railroad', 'TYPE':'RAILROAD', 'PRICE':200},
+    {'ID':5, 'NAME':'Reading Railroad', 'TYPE':'RAILROAD', 'SUIT':'RAILROAD' 'PRICE':200},
     {'ID':6, 'NAME':'Oriental Avenue', 'TYPE':'LAND', 'SUIT':'LIGHT_BLUE', 'PRICE':100,
     'RENTS':[6,30,90,270,400,550], 'HOUSE_COST':50},
     {'ID':7, 'NAME':'Chance', 'TYPE':'CHANCE'},
@@ -41,13 +41,13 @@ std_board_data = [
     {'ID':10, 'NAME':'Jail / Just Visiting', 'TYPE':'JAIL'},
     {'ID':11, 'NAME':'St. Charles Place', 'TYPE':'LAND', 'SUIT':'PINK', 'PRICE':140,
     'RENTS':[10,50,150,450,625,750], 'HOUSE_COST':100},
-    {'ID':12, 'NAME':'Electric Company', 'TYPE':'UTILITY', 'PRICE':150},
+    {'ID':12, 'NAME':'Electric Company', 'TYPE':'UTILITY', 'SUIT':'UTILITY', 'PRICE':150},
     {'ID':13, 'NAME':'States Avenue', 'TYPE':'LAND', 'SUIT':'PINK', 'PRICE':140,
     'RENTS':[10,50,150,450,625,750], 'HOUSE_COST':100},
     {'ID':14, 'NAME':'Virginia Avenue', 'TYPE':'LAND', 'SUIT':'PINK', 'PRICE':160,
     'RENTS':[12,60,180,500,700,900], 'HOUSE_COST':100},
 
-    {'ID':15, 'NAME':'Pennsylvania Railroad', 'TYPE':'RAILROAD', 'PRICE':200},
+    {'ID':15, 'NAME':'Pennsylvania Railroad', 'TYPE':'RAILROAD', 'SUIT':'RAILROAD', 'PRICE':200},
     {'ID':16, 'NAME':'St. James Place', 'TYPE':'LAND', 'SUIT':'ORANGE', 'PRICE':180,
     'RENTS':[14,70,200,550,750,950], 'HOUSE_COST':100},
     {'ID':17, 'NAME':'Community Chest', 'TYPE':'COMMUNITY_CHEST'},
@@ -65,12 +65,12 @@ std_board_data = [
     {'ID':24, 'NAME':'Illinois Avenue', 'TYPE':'LAND', 'SUIT':'RED', 'PRICE':240,
     'RENTS':[20,100,300,750,925,1100], 'HOUSE_COST':150},
 
-    {'ID':25, 'NAME':'B & O Railroad', 'TYPE':'RAILROAD', 'PRICE':200},
+    {'ID':25, 'NAME':'B & O Railroad', 'TYPE':'RAILROAD', 'SUIT':'RAILROAD', 'PRICE':200},
     {'ID':26, 'NAME':'Atlantic Avenue', 'TYPE':'LAND', 'SUIT':'YELLOW', 'PRICE':260,
     'RENTS':[22,110,330,800,975,1150], 'HOUSE_COST':150},
     {'ID':27, 'NAME':'Ventnor Avenue', 'TYPE':'LAND', 'SUIT':'YELLOW', 'PRICE':260,
     'RENTS':[22,110,330,800,975,1150], 'HOUSE_COST':150},
-    {'ID':28, 'NAME':'Water Works', 'TYPE':'UTILITY', 'PRICE':150},
+    {'ID':28, 'NAME':'Water Works', 'TYPE':'UTILITY', 'SUIT':'UTILITY',  'PRICE':150},
     {'ID':29, 'NAME':'Marvin Gardens', 'TYPE':'LAND', 'SUIT':'YELLOW', 'PRICE':280,
     'RENTS':[24,120,360,850,1025,1200], 'HOUSE_COST':150},
 
@@ -83,7 +83,7 @@ std_board_data = [
     {'ID':34, 'NAME':'Pennsylvania Avenue', 'TYPE':'LAND', 'SUIT':'GREEN', 'PRICE':320,
     'RENTS':[28,150,450,1000,1200,1400], 'HOUSE_COST':200},
 
-    {'ID':35, 'NAME':'Short Line', 'TYPE':'RAILROAD', 'PRICE':200},
+    {'ID':35, 'NAME':'Short Line', 'TYPE':'RAILROAD', 'SUIT':'RAILROAD', 'PRICE':200},
     {'ID':36, 'NAME':'Chance', 'TYPE':'CHANCE'},
     {'ID':37, 'NAME':'Park Place', 'TYPE':'LAND', 'SUIT':'BLUE', 'PRICE':350,
     'RENTS':[35,175,500,1100,1300,1500], 'HOUSE_COST':200},
