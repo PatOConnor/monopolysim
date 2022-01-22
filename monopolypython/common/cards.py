@@ -81,7 +81,7 @@ class Deck:
         return
 
     def draw(self):
-        for card in deck:
+        for card in self.cards:
             if not card.flipped:
                 card.flipped = True
                 return card

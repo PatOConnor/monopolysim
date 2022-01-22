@@ -7,79 +7,67 @@ class Investor:
         self.is_bankrupt = False
         self.name = name
         self.money = starting_funds
-        #format: {LAND_ID:{'MORTGAGED':True/False, 'HOUSES':N}}
-        self.assets = {}
+        self.assets = []
         self.jail_cards = 0
 
     #bank is always present but it sometimes the landlord
     def pay_to(self, amount, landlord, bank=None):
-        while investor.cant_pay(amount):
-            if investor.has_houses():
-                location = random.randint(self.assets)
-                investor.sell_house(location, bank)
-            elif investor.has_property():
-                location = random.randint(self.assets)
-                investor.mortgage(location, bank)
+        while self.cant_pay(amount):
+            if self.land_with_houses() != []:
+                house_land = self.land_with_houses()
+                location = random.choice(house_land) #random house
+                #location = house_land[-1] #most valuable house
+                self.sell_house(location, bank)
+            elif self.has_property():
+                unmortgaged = self.unmortgaged_land()
+                location = random.choice(unmortgaged)
+                #location = unmortgaged[-1]
+                self.mortgage(location, bank)
             else:
-                landlord.money += investor.money
-                investor.money = 0
-                investor.is_bankrupt = True
-                investor.repo_assets(bank)
+                #lose sequence
+                landlord.money += self.money
+                self.money = 0
+                self.is_bankrupt = True
+                self.repo_assets(bank)
                 return
-        investor.money -= amount
+        self.money -= amount
         landlord.money += amount
         return
 
-
-    '''
-    def deduct(self, investor, debt, landlord=None):
-        if landlord==None:
-            landlord=self.bank
-here    while(investor.money < debt): #can't pay
-            if self.watching: feedback('INSUFFICIENT', investor)
-            if investor.assets:
-                has_houses = [x for x in investor.assets if investor.assets[x]['HOUSES'] > 0]
-                if len(has_houses) > 0:
-                    land_ID = random.choice(has_houses)
-                    self.sell_house(investor,land_ID)
-                else: #time to mortgage property
-                    #collect unmortgaged propertyies in one dict
-                    unmortgaged = {}
-                    for asset in investor.assets:
-                        if investor.assets[asset]['MORTGAGED'] == False:
-                            unmortgaged[asset] = investor.assets[asset]
-                    #mortgage property if possible
-                    if len(unmortgaged) > 0:
-                        land_ID = random.choice([x for x in unmortgaged])#grab a key, not the dict entry
-                        self.mortgage(investor, self.board[land_ID])
-                    else: #losing sequence
-                        landlord.money += investor.money
-                        #transfer mortgaged property to bank
-                        for a in investor.assets:
-                            self.bank.assets[a] = investor.assets[a]
-                        self.bank_auction()
-                        return False
-            else:#losing sequence
-                landlord.money += investor.money
-                return False
-        #investor can afford it
-        investor.money -= debt
-        landlord.money += debt
-        return True'''
-
     def buy(self, land):
-        investor.money -= land.price
+        self.money -= land.price
         land.is_owned = True
-        land.owner = investor
-        investor.assets.append(land)
+        land.owner = self
+        self.assets.append(land)
 
     def mortgage(self, land):
-        if self.watching: feedback('MORTGAGE_PROPERTY', investor, land.name)
-        investor.money += land.price/2
+        if self.watching: feedback('MORTGAGE_PROPERTY', self, land.name)
+        self.money += land.price/2
         land.is_mortgaged = True
 
+    def land_with_houses(self):
+        result = []
+        for land in self.assets:
+            if land.houses > 0 or land.has_hotel:
+                result.append(land)
+        return result
+
+
+    def unmortgaged_land(self):
+        result = []
+        for land in self.assets:
+            if not land.is_mortgaged:
+                result.append(land)
+        return result
+
+    def cant_pay(self, amount):
+        if amount > self.money:
+            return True
+        return False
+
+
     def count_houses(self):
-        if self.assets = []:
+        if self.assets == []:
             return 0
         i = 0
         for asset in self.assets:
@@ -87,14 +75,13 @@ here    while(investor.money < debt): #can't pay
         return i
 
     def count_hotels(self):
-        if self.assets = []:
+        if self.assets == []:
             return 0
         i = 0
         for asset in self.assets:
             if asset.has_hotel:
                 i += 1
         return i
-
 
     def count_railroads(self):
         i = 0
@@ -106,9 +93,15 @@ here    while(investor.money < debt): #can't pay
                     i += 1
             return i
 
+    def repo_assets(self, bank):
+        for land in self.assets:
+            land.owner = None
+            bank.assets.append(land)
+            self.assets.remove(land)
+
     '''returns the amount of rent due to the tenant
     landing on this investor's railroad'''
-    def railroad_rent(investor):
+    def railroad_rent(self):
         rr = self.count_railroads()
         if rr==1: return 25
         if rr==2: return 50
