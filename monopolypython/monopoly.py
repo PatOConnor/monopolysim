@@ -1,6 +1,6 @@
 from common.cards import chance, community_chest
 from common.boards import std_board
-from investor import Investor
+from investor import Investor, Bank
 from feedback import feedback
 
 from numpy import random
@@ -30,7 +30,7 @@ class Monopoly:
     def __init__(self, board, player_count, watching):
         #making investors
         self.investors = [Investor(starting_funds=1500, name='Player '+str(x)) for x in range(1,player_count+1)]
-        self.bank = Investor(starting_funds=20580-len(self.investors)*1500, name='Bank')
+        self.bank = Bank(starting_funds=20580-len(self.investors)*1500, name='Bank')
 
         self.board = board
         self.watching = watching
@@ -86,7 +86,52 @@ class Monopoly:
             self.land_actions(investor, land, diceroll, double_rent)
 
     def free_action(self, investor):
-        pass
+        #if you can afford to unmortgage your land, you do so
+        mortgaged_land = investor.mortgaged_land()
+        unmortgaged_land = investor.unmortgaged_land()
+        if mortgaged_land != 0:
+            #pick most expensive one
+            for land in mortgaged_land:
+                mortgage_price = land.price*11/20
+                if investor.can_pay(mortgage_price):
+                    investor.unmortgage(land)
+                    break#one unmortgage per free_action()
+
+
+        #if you can buy a house, you do so
+        if bank.has_buildings():
+            for land in unmortgaged_land[::-1]:
+                if investor.can_pay(land.house_cost):
+                    if land.houses == 4 and bank.has_hotels():
+                        if self.watching:
+                            feedback('BUILD_HOUSE',investor, land.name)
+                        investor.build_hotel(land, bank)
+                    elif bank.has_houses():
+                        if self.watching:
+                            feedback('BUILD_HOUSE',investor, land.name)
+                        investor.build_house(land, bank)
+
+        #if there is a favorable trade, perform it
+        near_monopolies = investor.near_monopolies()
+        if near_monopolies != []: #if the investor is close to a monopoly,
+
+            #itll scan to see if the missing piece is owned by another player
+
+            #if it is:
+                #perform the trade with the corresponding piece if both players get a monopoly
+                #perform the trade with a piece that the other investor has at least one of the suit of
+                #dont perform the trade if theres nothing in it for the other guy
+
+
+        #if all property is owned and no near_monopolies,
+            #make a random trade as long as it does not give the
+            #opponent a monopoly
+
+
+
+
+
+
 
     '''Property Stuff'''
 
@@ -140,13 +185,6 @@ class Monopoly:
             feedback('BANK_AUCTION')
         for land in self.bank.assets:
             self.auction(land)
-
-    def build_house(self, investor, land):
-        pass
-
-    def sell_house(self, investor, land):
-        if self.watching:
-            feedback('SELL_HOUSE',investor, land.name)
 
 
 

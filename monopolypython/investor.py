@@ -1,4 +1,29 @@
 from numpy import random
+
+class Bank(Investor):
+    def __init__(self):
+        Investor.__init__(self)
+        self.houses = 32
+        self.hotels = 12
+
+    def has_buildings(self):
+        if self.houses > 0 or self.hotels > 0:
+            return True
+        else:
+            return False
+                                        #readability methods
+    def has_houses(self):
+        if self.houses > 0:
+            return True
+        else:
+            return False
+
+    def has_hotels(self):
+        if self.hotels > 0:
+            return True
+        else:
+            return False
+
 class Investor:
     def __init__(self, starting_funds, name=''):
         self.position = 0 #Start Space
@@ -55,6 +80,12 @@ class Investor:
             if land.houses > 0 or land.has_hotel:
                 result.append(land)
         return result
+
+
+    def build_house(self, land, bank):
+        self.pay_to(land.house_cost, bank)
+        land.houses += 1
+
 
     def mortgaged_land(self):
         result = []

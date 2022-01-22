@@ -35,6 +35,9 @@ def feedback(msg_type, investor=None, data=None):
     elif msg_type=='MORTGAGE_PROPERTY':
         print(investor.name+' mortgages property '+data)
 
+    elif msg_type=='UNMORTGAGE_PROPERTY':
+        print(investor.name+' reclaims ownership of '+data)
+
 
     elif msg_type=='BANK_AUCTION':
         print('The players assets will now be auctioned by the bank.')
