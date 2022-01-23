@@ -30,7 +30,7 @@ class Monopoly:
     def __init__(self, board, player_count, watching):
         #making investors
         self.investors = [Investor(starting_funds=1500, name='Player '+str(x)) for x in range(1,player_count+1)]
-        self.bank = Bank(starting_funds=20580-len(self.investors)*1500, name='Bank')
+        self.bank = Bank(starting_funds=20580-len(self.investors)*1500)
 
         self.board = board
         self.watching = watching
@@ -40,11 +40,18 @@ class Monopoly:
         print('\n'+'*'*15)
         print('Beginning of Turn '+str(self.turn_count))
         for investor in self.investors:
-            print(investor.name + ' has $' + str(investor.money) + '  and  ' + str(len(investor.assets)) + ' properties')
+            print('\n'+investor.name + ' has $' + str(investor.money) + '  and these properties:')
+            for asset in investor.assets:
+                try:
+                    print(asset.name, 'mortgaged: '+str(asset.is_mortgaged),
+                          str(asset.houses)+' houses', 'has hotel: '+str(asset.has_hotel))
+                except AttributeError:
+                    print(asset.name, 'mortgaged: '+str(asset.is_mortgaged))
         print('*'*15)
         input()
 
     '''Primary Methods for Game Processing'''
+
     def take_turn(self, investor):
         if self.watching:
             feedback(investor, 'TURN_START')
@@ -100,26 +107,28 @@ class Monopoly:
 
 
         #if you can buy a house, you do so
-        if bank.has_buildings():
+        if self.bank.has_buildings():
             for land in unmortgaged_land[::-1]:
+                if land.type in ('RAILROAD', 'UTILITY'):
+                    continue #can't buy houses on these properties
                 if investor.can_pay(land.house_cost):
-                    if land.houses == 4 and bank.has_hotels():
+                    if land.houses == 4 and self.bank.has_hotels():
                         if self.watching:
                             feedback('BUILD_HOUSE',investor, land.name)
                         investor.build_hotel(land, bank)
-                    elif bank.has_houses():
+                    elif self.bank.has_houses() and self.is_part_of_monopoly(land):
                         if self.watching:
                             feedback('BUILD_HOUSE',investor, land.name)
-                        investor.build_house(land, bank)
+                        investor.build_house(land, self.bank)
 
         #TRADING
-        needed_for_monopoly = investor.needed_for_monopoly()
-        if needed != []: #if the investor is close to a monopoly,
+        needed_for_monopoly = self.needed_for_monopoly(investor)
+        if needed_for_monopoly != None: #if the investor is close to a monopoly,
             for land in needed_for_monopoly[::-1]:
                 if not land.is_owned:
                     continue #no one to trade with; check the others
                 else:
-                    good_trades = land.owner.needed_for_monopoly() #missing lands for other players
+                    good_trades = self.needed_for_monopoly(land.owner) #missing lands for other players
                     for otherland in good_trades[::-1]:
                         if land_2 in investor.assets:
                             #both players achieve monopoly
@@ -129,15 +138,54 @@ class Monopoly:
             #'hey, anyone want this?'
             land = random.choice(investor.assets)
             for player in self.investors:
-                if player != investor and land not in player.needed_for_monopoly():
+                if player != investor and land not in self.needed_for_monopoly(player):
                     otherland = random.choice(player.assets)
-                    if otherland not in investor.needed_for_monopoly():
+                    if otherland not in self.needed_for_monopoly(investor):
                         investor.trade(player,land,otherland)
+
+    def needed_for_monopoly(self, investor):
+        if investor.assets == []:
+            return
+        suits_dict = {}
+        near_suits = []
+        needed_land = []
+        for land in investor.assets:
+            try:
+                suits_dict[land.suit] += 1
+            except KeyError:
+                suits_dict[land.suit] = 0
+        for key in suits_dict:
+            rail_cond = key=='RAILROAD' and suits_dict[key] == (2 or 3)
+            util_cond = key=='UTILITY' and suits_dict[key] == 1
+            land_cond = key!=('LAND' or 'UTILITY') and suits_dict[key] == 2
+            if rail_cond or util_cond or land_cond:
+                near_suits.append(key)
+        for land in self.board:
+            try:
+                if land.suit in near_suits and land.owner != investor:
+                    needed_land.append(land)
+            except AttributeError:
+                continue #this occurs when scanning a space with no suit
+        return needed_land
+
+
+    def is_part_of_monopoly(self, land):
+        board_index = self.board.index(land)
+        spacerange = self.board[board_index-3:board_index+3]
+        suit = land.suit
+        for space in spacerange:
+            try:
+                if land.suit != space.suit:
+                    return False
+            except AttributeError:
+                continue
+        return False
+
+
+
 
     def all_land_owned(self):
         return True if sum([len(player.assets) for player in self.investors]) == 28 else False
-
-
 
 
     '''Property Stuff'''

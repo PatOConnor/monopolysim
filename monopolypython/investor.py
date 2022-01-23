@@ -1,29 +1,5 @@
 from numpy import random
 
-class Bank(Investor):
-    def __init__(self):
-        Investor.__init__(self)
-        self.houses = 32
-        self.hotels = 12
-
-    def has_buildings(self):
-        if self.houses > 0 or self.hotels > 0:
-            return True
-        else:
-            return False
-                                        #readability methods
-    def has_houses(self):
-        if self.houses > 0:
-            return True
-        else:
-            return False
-
-    def has_hotels(self):
-        if self.hotels > 0:
-            return True
-        else:
-            return False
-
 class Investor:
     def __init__(self, starting_funds, name=''):
         self.position = 0 #Start Space
@@ -81,11 +57,9 @@ class Investor:
                 result.append(land)
         return result
 
-
     def build_house(self, land, bank):
         self.pay_to(land.house_cost, bank)
         land.houses += 1
-
 
     def mortgaged_land(self):
         result = []
@@ -104,9 +78,6 @@ class Investor:
         self.assets.remove(land)
         return
 
-
-
-
     def unmortgaged_land(self):
         result = []
         for land in self.assets:
@@ -118,7 +89,6 @@ class Investor:
         if amount < self.money:
             return True
         return False
-
 
     def count_houses(self):
         if self.assets == []:
@@ -153,9 +123,9 @@ class Investor:
             bank.assets.append(land)
             self.assets.remove(land)
 
-    '''returns the amount of rent due to the tenant
-    landing on this investor's railroad'''
     def railroad_rent(self):
+        '''returns the amount of rent due to the
+        tenant landing on this investor's railroad'''
         rr = self.count_railroads()
         if rr==1: return 25
         if rr==2: return 50
@@ -163,28 +133,26 @@ class Investor:
         if rr==4: return 200
 
 
-    #returns list of the spaces this player needs to get a full suit
-    def needed_for_monopoly(self):
-        result = []
+class Bank(Investor):
+    def __init__(self, starting_funds):
+        Investor.__init__(self, starting_funds, name='Bank')
+        self.houses = 32
+        self.hotels = 12
 
+    def has_buildings(self):
+        if self.houses > 0 or self.hotels > 0:
+            return True
+        else:
+            return False
+                                        #readability methods
+    def has_houses(self):
+        if self.houses > 0:
+            return True
+        else:
+            return False
 
-
-        #check the player assets
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#
+    def has_hotels(self):
+        if self.hotels > 0:
+            return True
+        else:
+            return False
