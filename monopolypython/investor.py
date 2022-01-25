@@ -71,6 +71,7 @@ class Investor:
     def trade(self, opponent, land, otherland):
         self.assets.append(otherland)
         otherland.owner = self
+        print('\n\n\n', otherland, opponent.assets)
         opponent.assets.remove(otherland)
 
         opponent.assets.append(land)

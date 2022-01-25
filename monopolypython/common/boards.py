@@ -15,7 +15,7 @@ class Space:
             self.houses = 0
             self.has_hotel = False
 
-    def __str__(self):
+    def __repr__(self):
         return self.name
 
 

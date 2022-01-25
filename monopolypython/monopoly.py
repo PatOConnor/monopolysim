@@ -133,7 +133,7 @@ class Monopoly:
                     for otherland in good_trades[::-1]:
                         if otherland in investor.assets:
                             #both players achieve monopoly
-                            investor.trade(land.owner,land,otherland)
+                            investor.trade(land.owner,otherland, land)
                             break
         elif self.all_land_owned():
             #'hey, anyone want this?'
