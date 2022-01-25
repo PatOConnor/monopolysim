@@ -22,7 +22,7 @@ def run(iswatching=True):
                 feedback('TURN_START', investor)
             game.take_turn(investor)
         game.turn_count += 1
-        if game.turn_count%10==1:
+        if game.turn_count%10==1 and game.watching:
             system('cls')
     print(game.investors[0].name+' Wins with an account of $'+str(game.investors[0].money))
 
@@ -43,7 +43,7 @@ class Monopoly:
             print('\n'+investor.name + ' has $' + str(investor.money) + '  and these properties:')
             for asset in investor.assets:
                 try:
-                    print(asset.name, 'mortgaged: '+str(asset.is_mortgaged),
+                    print(asset.name, '\t'+asset.suit, '\tmortgaged: '+str(asset.is_mortgaged),
                           str(asset.houses)+' houses', 'has hotel: '+str(asset.has_hotel))
                 except AttributeError:
                     print(asset.name, 'mortgaged: '+str(asset.is_mortgaged))
@@ -53,6 +53,7 @@ class Monopoly:
     '''Primary Methods for Game Processing'''
 
     def take_turn(self, investor):
+        investor.sort_land()
         if self.watching:
             feedback(investor, 'TURN_START')
         self.free_action(investor)
@@ -130,7 +131,7 @@ class Monopoly:
                 else:
                     good_trades = self.needed_for_monopoly(land.owner) #missing lands for other players
                     for otherland in good_trades[::-1]:
-                        if land_2 in investor.assets:
+                        if otherland in investor.assets:
                             #both players achieve monopoly
                             investor.trade(land.owner,land,otherland)
                             break
@@ -153,7 +154,8 @@ class Monopoly:
             try:
                 suits_dict[land.suit] += 1
             except KeyError:
-                suits_dict[land.suit] = 0
+                suits_dict[land.suit] = 1
+#        print(suits_dict)
         for key in suits_dict:
             rail_cond = key=='RAILROAD' and suits_dict[key] == (2 or 3)
             util_cond = key=='UTILITY' and suits_dict[key] == 1
@@ -166,6 +168,7 @@ class Monopoly:
                     needed_land.append(land)
             except AttributeError:
                 continue #this occurs when scanning a space with no suit
+        print(needed_land)
         return needed_land
 
 

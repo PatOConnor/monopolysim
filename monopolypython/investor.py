@@ -19,7 +19,7 @@ class Investor:
                 location = random.choice(house_land) #random house
                 #location = house_land[-1] #most valuable house
                 self.sell_house(location, bank)
-            elif self.has_property():
+            elif len(self.assets) > 0:
                 unmortgaged = self.unmortgaged_land()
                 location = random.choice(unmortgaged)
                 #location = unmortgaged[-1]
@@ -132,6 +132,8 @@ class Investor:
         if rr==3: return 100
         if rr==4: return 200
 
+    def sort_land(self):
+        self.assets.sort(key=lambda x: x.id)
 
 class Bank(Investor):
     def __init__(self, starting_funds):

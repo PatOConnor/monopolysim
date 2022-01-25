@@ -15,6 +15,9 @@ class Space:
             self.houses = 0
             self.has_hotel = False
 
+    def __str__(self):
+        return self.name
+
 
 '''
     The monopoly board is structured as a list of the data used to construct a
