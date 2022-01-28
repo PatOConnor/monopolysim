@@ -53,8 +53,9 @@ class Investor:
     def land_with_houses(self):
         result = []
         for land in self.assets:
-            if land.houses > 0 or land.has_hotel:
-                result.append(land)
+            if land.type == 'LAND':
+                if land.houses > 0 or land.has_hotel:
+                    result.append(land)
         return result
 
     def build_house(self, land, bank):

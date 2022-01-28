@@ -33,12 +33,12 @@ std_board_data = [
     {'ID':4, 'NAME':'Income Tax', 'TYPE':'INCOME_TAX'},
 
     {'ID':5, 'NAME':'Reading Railroad', 'TYPE':'RAILROAD', 'SUIT':'RAILROAD', 'PRICE':200},
-    {'ID':6, 'NAME':'Oriental Avenue', 'TYPE':'LAND', 'SUIT':'LIGHT_BLUE', 'PRICE':100,
+    {'ID':6, 'NAME':'Oriental Avenue', 'TYPE':'LAND', 'SUIT':'BLUE', 'PRICE':100,
     'RENTS':[6,30,90,270,400,550], 'HOUSE_COST':50},
     {'ID':7, 'NAME':'Chance', 'TYPE':'CHANCE'},
-    {'ID':8, 'NAME':'Vermont Avenue', 'TYPE':'LAND', 'SUIT':'LIGHT_BLUE', 'PRICE':100,
+    {'ID':8, 'NAME':'Vermont Avenue', 'TYPE':'LAND', 'SUIT':'BLUE', 'PRICE':100,
     'RENTS':[6,30,90,270,400,550], 'HOUSE_COST':50},
-    {'ID':9, 'NAME':'Connecticut Avenue', 'TYPE':'LAND', 'SUIT':'LIGHT_BLUE', 'PRICE':120,
+    {'ID':9, 'NAME':'Connecticut Avenue', 'TYPE':'LAND', 'SUIT':'BLUE', 'PRICE':120,
     'RENTS':[8,40,100,300,450,600],  'HOUSE_COST':50},
 
     {'ID':10, 'NAME':'Jail / Just Visiting', 'TYPE':'JAIL'},
@@ -88,10 +88,10 @@ std_board_data = [
 
     {'ID':35, 'NAME':'Short Line', 'TYPE':'RAILROAD', 'SUIT':'RAILROAD', 'PRICE':200},
     {'ID':36, 'NAME':'Chance', 'TYPE':'CHANCE'},
-    {'ID':37, 'NAME':'Park Place', 'TYPE':'LAND', 'SUIT':'BLUE', 'PRICE':350,
+    {'ID':37, 'NAME':'Park Place', 'TYPE':'LAND', 'SUIT':'NAVY', 'PRICE':350,
     'RENTS':[35,175,500,1100,1300,1500], 'HOUSE_COST':200},
     {'ID':38, 'NAME':'LUXURY_TAX', 'TYPE':'LUXURY_TAX'},
-    {'ID':39, 'NAME':'Boardwalk', 'TYPE':'LAND', 'SUIT':'BLUE', 'PRICE':400,
+    {'ID':39, 'NAME':'Boardwalk', 'TYPE':'LAND', 'SUIT':'NAVY', 'PRICE':400,
     'RENTS':[50,200,600,1400,1700,2000], 'HOUSE_COST':200},
 ]
 std_board = [Space(data) for data in std_board_data]

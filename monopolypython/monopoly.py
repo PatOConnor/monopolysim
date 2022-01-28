@@ -6,6 +6,17 @@ from feedback import feedback
 from numpy import random
 from os import system
 
+'''
+    STATUS:
+            The Game Logic is mostly complete as far as i can tell
+
+            the bots won't buy houses or trade with each other, i need to fix
+            that part of the logic
+
+            at that point... what? Will that mean that I'm done? is that the
+            point where i abstract to other boards? create a real AI?
+'''
+
 def run(iswatching=True):
     game = Monopoly(board=std_board,
                     player_count=4,
@@ -43,15 +54,14 @@ class Monopoly:
             print('\n'+investor.name + ' has $' + str(investor.money) + '  and these properties:')
             for asset in investor.assets:
                 try:
-                    print(asset.name, '\t'+asset.suit, '\tmortgaged: '+str(asset.is_mortgaged),
-                          str(asset.houses)+' houses', 'has hotel: '+str(asset.has_hotel))
+                    print(asset.name[0:12:], '\t'+asset.suit, '\tmortgaged?'+str(asset.is_mortgaged),
+                          '\t'+str(asset.houses)+' houses', 'hotel?'+str(asset.has_hotel))
                 except AttributeError:
-                    print(asset.name, 'mortgaged: '+str(asset.is_mortgaged))
+                    print(asset.name[0:12:], '\t\tmortgaged?'+str(asset.is_mortgaged))
         print('*'*15)
         input()
 
     '''Primary Methods for Game Processing'''
-
     def take_turn(self, investor):
         investor.sort_land()
         if self.watching:
@@ -113,6 +123,7 @@ class Monopoly:
                 if land.type in ('RAILROAD', 'UTILITY'):
                     continue #can't buy houses on these properties
                 if investor.can_pay(land.house_cost):
+                    print('BUYING HOUSE DEBUG: I AM HERE')
                     if land.houses == 4 and self.bank.has_hotels():
                         if self.watching:
                             feedback('BUILD_HOUSE',investor, land.name)
@@ -137,6 +148,7 @@ class Monopoly:
                             break
         elif self.all_land_owned():
             #'hey, anyone want this?'
+            print('ALL LAND OWNED DEBUG')
             land = random.choice(investor.assets)
             for player in self.investors:
                 if player != investor and land not in self.needed_for_monopoly(player):
